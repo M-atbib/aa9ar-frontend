@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <SpeedInsights />
-      <body>{children}</body>
+      <body className="bg-offWhite">{children}</body>
     </html>
   );
 }
