@@ -213,6 +213,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       // Clear the token
       useAuthStore.getState().clearToken();
+      window.location.href = "/";
 
       set({
         user: null,

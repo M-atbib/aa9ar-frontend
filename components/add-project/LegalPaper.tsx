@@ -6,10 +6,9 @@ import { useProjectStore } from "@/stores/projectStore";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import { LegalPaperForm } from "@/types/project-type";
 
 export default function LegalPaper() {
-  const { formData, updateFormData } = useProjectStore();
+  const { formData } = useProjectStore();
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [currentName, setCurrentName] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -19,13 +18,6 @@ export default function LegalPaper() {
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-
-    const newLegalPaper: LegalPaperForm = {
-      name: currentName,
-      file: currentFile,
-    };
-
-    updateFormData("legalPaper", [...formData.legalPaper, newLegalPaper]);
 
     // Reset inputs
     setCurrentFile(null);
@@ -70,7 +62,7 @@ export default function LegalPaper() {
           <Button onClick={handleSaveFile} className="w-fit mt-2">
             Ajouter Document
           </Button>
-          {formData.legalPaper.length > 0 && (
+          {/* {formData.legalPaper.length > 0 && (
             <div className="mt-2">
               <p className="text-sm text-gray-500">Documents ajoutés:</p>
               <ul className="list-disc list-inside">
@@ -81,7 +73,7 @@ export default function LegalPaper() {
                 ))}
               </ul>
             </div>
-          )}
+          )} */}
           {currentFile && (
             <p className="text-sm text-green-600">
               Cliquez sur Ajouter pour sauvegarder le document:{" "}

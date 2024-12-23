@@ -10,11 +10,10 @@ import { FormEvent, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Login() {
   const router = useRouter();
-  const { login, setExpiresAt } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -99,10 +98,6 @@ export default function Login() {
     }));
   };
 
-  const handleRememberChange = (checked: boolean) => {
-    setExpiresAt(checked ? 30 : 7);
-  };
-
   return (
     <div className="flex justify-between">
       <div className="w-[50%] pl-16 mt-14">
@@ -143,20 +138,25 @@ export default function Login() {
             </div>
           ))}
 
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Checkbox id="remember" onCheckedChange={handleRememberChange} />
-              <Label className="text-sm text-gray-500">
-                Rappelez-vous pendant 30 jours
-              </Label>
-            </div>
+          <div className="flex justify-end items-center">
             <Link href="#" className="text-sm text-primary">
               Mot de passe oublié
             </Link>
           </div>
 
-          <Button type="submit" className="w-full">
-            Se connecter
+          <Button
+            type="submit"
+            className="w-full relative"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Connexion...</span>
+              </div>
+            ) : (
+              "Se connecter"
+            )}
           </Button>
 
           <div className="flex items-center gap-2">

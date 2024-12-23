@@ -41,7 +41,7 @@ export default function HomeNavbar() {
             S&apos;inscrire
           </Link>
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="secondary" size="sm">
           <Link href="/login" className="flex items-center gap-2">
             Se connecter
           </Link>

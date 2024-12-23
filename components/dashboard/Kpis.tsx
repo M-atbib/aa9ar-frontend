@@ -50,14 +50,14 @@ export default function DashboardKpis() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {kpis.map((kpi) => (
         <Card
-          className="p-4 bg-primaryGradient text-white flex flex-col justify-between gap-4"
+          className="p-5 bg-primaryGradient text-white flex flex-col justify-between gap-6"
           key={kpi.name}
         >
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-lg font-semibold">{kpi.name}</h3>
-            <div className="text-3xl">{kpi.icon}</div>
+            <div className="text-4xl">{kpi.icon}</div>
           </div>
-          <p className="text-4xl font-bold">{kpi.value}</p>
+          <p className="text-5xl font-bold">{kpi.value}</p>
         </Card>
       ))}
     </div>

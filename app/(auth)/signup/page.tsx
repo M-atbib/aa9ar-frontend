@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 
 export default function Signup() {
   const router = useRouter();
-  const { register } = useAuthStore();
+  const { register, isLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -190,8 +190,19 @@ export default function Signup() {
             </div>
           ))}
 
-          <Button type="submit" className="w-full">
-            S&apos;inscrire
+          <Button
+            type="submit"
+            className="w-full relative"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Inscription...</span>
+              </div>
+            ) : (
+              "S'inscrire"
+            )}
           </Button>
 
           <div className="flex items-center gap-2">
@@ -213,13 +224,13 @@ export default function Signup() {
           </div>
         </form>
       </div>
-      <div className="w-[50%]">
+      <div className="w-[50%] ">
         <Image
           src="/images/signup.jpeg"
           alt="aa9ar"
           width={200}
           height={200}
-          className="w-full max-h-screen object-cover rounded-l-lg"
+          className="w-full h-screen object-cover rounded-l-lg"
         />
       </div>
     </div>
