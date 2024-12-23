@@ -9,73 +9,108 @@ import CommercialInfo from "@/components/add-project/CommercialInfo";
 import ProjectPartner from "@/components/add-project/ProjectPartner";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Breadcrumb,
-  BreadcrumbLink,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import Breadcrumb from "@/components/layout/Breadcrumb";
+import { useCompanyStore } from "@/stores/companyStore";
+import { useEffect } from "react";
 
 export default function ProjectAdd() {
-  const { currentStep, formData, nextStep, previousStep } = useProjectStore();
+  const {
+    currentStep,
+    paperReady,
+    commercial,
+    partnership,
+    formData,
+    isLoading,
+    nextStep,
+    previousStep,
+    createProject,
+    updateFormData,
+  } = useProjectStore();
+
+  const { getCompanies } = useCompanyStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const companyId = await getCompanies();
+      if (companyId) {
+        updateFormData("company_id", companyId.id);
+      }
+    };
+    fetchData();
+  }, [getCompanies, updateFormData]);
 
   const renderStep = () => {
     switch (currentStep) {
       case 0:
         return <MainInfo />;
       case 1:
-        return formData.mainInfo.paperReady && <LegalPaper />;
+        return paperReady && <LegalPaper />;
       case 2:
         return <TerrainInfo />;
       case 3:
         return <AppartementInfo />;
       case 4:
-        return formData.terrainInfo.commercial && <CommercialInfo />;
+        return commercial && <CommercialInfo />;
       case 5:
-        return formData.mainInfo.partnership && <ProjectPartner />;
+        return partnership && <ProjectPartner />;
       default:
         return null;
     }
   };
 
-  const handleNextStep = () => {
-    nextStep();
+  const isLastStep = () => {
+    if (!commercial && !partnership && currentStep === 3) return true;
+    if (commercial && !partnership && currentStep === 4) return true;
+    if (partnership && currentStep === 5) return true;
+    return false;
   };
 
   const handlePreviousStep = () => {
     previousStep();
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isLastStep() && formData.company_id !== "") {
+      console.log(isLastStep());
+      await createProject(formData);
+    }
+  };
+
   return (
-    <div className="w-[50%] flex flex-col items-center gap-8 mx-auto my-10">
+    <div className="container-md max-w-screen-md flex flex-col items-center gap-8 mx-auto my-10">
       <Image src="/logo/main.png" alt="logo" width={150} height={150} />
 
-      <div className="w-[80%] space-y-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Tableau de bord</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink>Ajouter nouveau projet</BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="w-[100%] space-y-6">
+        <Breadcrumb items={[{ link: "", title: "Ajouter nouveau projet" }]} />
 
-        {renderStep()}
+        <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
+          {renderStep()}
 
-        <div className="flex items-center justify-end gap-4">
-          {currentStep > 0 && (
-            <Button onClick={handlePreviousStep} variant="outline">
-              Précédent
-            </Button>
-          )}
-          <Button onClick={handleNextStep} variant="secondary">
-            Suivant
-          </Button>
-        </div>
+          <div className="flex items-center justify-end gap-4">
+            {currentStep > 0 && (
+              <Button onClick={handlePreviousStep} variant="outline">
+                Précédent
+              </Button>
+            )}
+            {isLastStep() ? (
+              <Button type="submit" variant="secondary">
+                {isLoading ? "En cours..." : "Ajouter projet"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  nextStep();
+                }}
+                variant="secondary"
+              >
+                Suivant
+              </Button>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );

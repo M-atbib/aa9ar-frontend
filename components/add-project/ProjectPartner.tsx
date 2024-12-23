@@ -3,13 +3,13 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { useProjectStore } from "@/stores/projectStore";
+// import { useProjectStore } from "@/stores/projectStore";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Partner } from "@/types/project-type";
 
 export default function ProjectPartner() {
-  const { updateFormData } = useProjectStore();
+  // const { updateFormData } = useProjectStore();
   const [numberOfPartners, setNumberOfPartners] = useState<number>(0);
   const [currentPartner, setCurrentPartner] = useState<Partner>({
     email: "",
@@ -37,10 +37,10 @@ export default function ProjectPartner() {
     setPartners(updatedPartners);
 
     // Update form data with all partners
-    updateFormData("partner", {
-      number_of_partners: numberOfPartners,
-      partners: updatedPartners,
-    });
+    // updateFormData("partner", {
+    //   number_of_partners: numberOfPartners,
+    //   partners: updatedPartners,
+    // });
 
     // Reset current partner
     setCurrentPartner({

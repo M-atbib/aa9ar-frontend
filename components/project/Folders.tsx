@@ -6,9 +6,10 @@ import { FaMoneyBillWave } from "react-icons/fa";
 import { BsBricks } from "react-icons/bs";
 import { MdArrowForward } from "react-icons/md";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function Folders() {
-  const id = 1;
+  const { id } = useParams();
 
   const folders = [
     { name: "Materiaux", icon: <BsBricks />, link: `/project/${id}/material` },

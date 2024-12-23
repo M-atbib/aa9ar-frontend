@@ -4,16 +4,18 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { useProjectStore } from "@/stores/projectStore";
+import { CreateProjectPayload } from "@/types/project-type";
 
 export default function TerrainInfo() {
-  const { formData, updateFormData } = useProjectStore();
+  const { formData, commercial, updateFormData, setCheckbox } =
+    useProjectStore();
 
   const handleInputChange = (
-    field: string,
-    value: string | number | boolean
+    field: keyof CreateProjectPayload["terrain"],
+    value: CreateProjectPayload["terrain"][keyof CreateProjectPayload["terrain"]]
   ) => {
-    updateFormData("terrainInfo", {
-      ...formData.terrainInfo,
+    updateFormData("terrain", {
+      ...formData.terrain,
       [field]: value,
     });
   };
@@ -31,7 +33,7 @@ export default function TerrainInfo() {
           <Input
             type="number"
             placeholder="ex: 1000"
-            value={formData.terrainInfo.surface || ""}
+            value={formData.terrain.surface || ""}
             onChange={(e) =>
               handleInputChange("surface", Number(e.target.value))
             }
@@ -42,7 +44,7 @@ export default function TerrainInfo() {
           <Input
             type="number"
             placeholder="ex: 1000000"
-            value={formData.terrainInfo.price || ""}
+            value={formData.terrain.price || ""}
             onChange={(e) => handleInputChange("price", Number(e.target.value))}
           />
         </div>
@@ -51,7 +53,7 @@ export default function TerrainInfo() {
           <Input
             type="number"
             placeholder="ex: 4"
-            value={formData.terrainInfo.borders || ""}
+            value={formData.terrain.borders || ""}
             onChange={(e) =>
               handleInputChange("borders", Number(e.target.value))
             }
@@ -62,7 +64,7 @@ export default function TerrainInfo() {
           <Input
             type="number"
             placeholder="ex: 5"
-            value={formData.terrainInfo.number_of_floors || ""}
+            value={formData.terrain.number_of_floors || ""}
             onChange={(e) =>
               handleInputChange("number_of_floors", Number(e.target.value))
             }
@@ -71,10 +73,8 @@ export default function TerrainInfo() {
 
         <div className="flex items-center gap-2">
           <Checkbox
-            checked={formData.terrainInfo.commercial || false}
-            onCheckedChange={(checked) =>
-              handleInputChange("commercial", !!checked)
-            }
+            checked={commercial || false}
+            onCheckedChange={(checked) => setCheckbox("commercial", !!checked)}
           />
           <Label className="text-sm">
             Ce terrain contient des unités commerciales

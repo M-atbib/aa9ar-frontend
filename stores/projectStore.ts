@@ -1,24 +1,11 @@
 import { create } from "zustand";
 import { fetchData } from "@/utils/fetchData";
-import { toast } from "sonner";
 import {
   Project,
-  MainInfoForm,
-  LegalPaperForm,
-  TerrainInfoForm,
-  AppartementInfoForm,
-  CommercialInfoForm,
-  ProjectPartnerForm,
+  CreateProjectPayload,
+  ProjectKpis,
+  ProjectUnit,
 } from "@/types/project-type";
-
-export interface ProjectFormData {
-  mainInfo: MainInfoForm;
-  legalPaper: LegalPaperForm[];
-  terrainInfo: TerrainInfoForm;
-  appartementInfo?: AppartementInfoForm;
-  commercialInfo?: CommercialInfoForm;
-  partner?: ProjectPartnerForm;
-}
 
 interface ProjectState {
   projects: Project[];
@@ -26,25 +13,53 @@ interface ProjectState {
   partnershipProjects: Project[];
   isLoading: boolean;
   error: string | null;
-  formData: ProjectFormData;
+  formData: CreateProjectPayload;
   currentStep: number;
-  createProject: (projectData: Omit<Project, "_id">) => Promise<void>;
-  getProject: (id: string) => Promise<void>;
-  getCompanyProjects: (companyId: string) => Promise<void>;
-  getPartnershipProjects: () => Promise<void>;
-  updateFormData: (
-    step: keyof ProjectFormData,
-    data: ProjectFormData[keyof ProjectFormData]
+  paperReady: boolean;
+  commercial: boolean;
+  partnership: boolean;
+  projectKpis: ProjectKpis;
+  updateFormData: <K extends keyof CreateProjectPayload>(
+    field: K,
+    value: CreateProjectPayload[K]
   ) => void;
   nextStep: () => void;
   previousStep: () => void;
   resetForm: () => void;
+  createProject: (projectData: CreateProjectPayload) => Promise<void>;
+  getProject: (id: string) => Promise<void>;
+  getCompanyProjects: (companyId: string) => Promise<void>;
+  getProjectKpis: (id: string) => Promise<void>;
+  getPartnershipProjects: () => Promise<void>;
+  setCheckbox: (checkbox: string, value: boolean) => void;
+  addUnit: (unit: ProjectUnit) => void;
 }
 
-const initialFormData: ProjectFormData = {
-  mainInfo: {} as MainInfoForm,
-  legalPaper: [] as LegalPaperForm[],
-  terrainInfo: {} as TerrainInfoForm,
+const initialFormData: CreateProjectPayload = {
+  company_id: "",
+  name: "",
+  address: "",
+  city: "",
+  status: "PLANNING",
+  total_budget: 0,
+  current_expenses: 0,
+  start_date: "",
+  end_date: "",
+  terrain: {
+    surface: 0,
+    price: 0,
+    borders: 0,
+    number_of_floors: 0,
+  },
+  global_apartments_info: {
+    count: 0,
+    profit_margin: 0,
+  },
+  global_commercial_info: {
+    count: 0,
+    profit_margin: 0,
+  },
+  units: [],
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -55,24 +70,33 @@ export const useProjectStore = create<ProjectState>((set) => ({
   error: null,
   formData: initialFormData,
   currentStep: 0,
+  paperReady: false,
+  commercial: false,
+  partnership: false,
+  projectKpis: {} as ProjectKpis,
 
-  updateFormData: (step, data) =>
+  updateFormData: (field, value) =>
     set((state) => ({
       formData: {
         ...state.formData,
-        [step]: data,
+        [field]: value,
       },
+    })),
+
+  setCheckbox: (checkbox, value) =>
+    set(() => ({
+      [checkbox]: value,
     })),
 
   nextStep: () =>
     set((state) => {
-      if (state.currentStep === 0 && !state.formData.mainInfo.paperReady) {
+      if (state.currentStep === 0 && !state.paperReady) {
         return { currentStep: state.currentStep + 2 };
       }
-      if (state.currentStep === 3 && !state.formData.terrainInfo.commercial) {
+      if (state.currentStep === 3 && !state.commercial) {
         return { currentStep: state.currentStep + 2 };
       }
-      if (state.currentStep === 4 && !state.formData.mainInfo.partnership) {
+      if (state.currentStep === 4 && !state.partnership) {
         return { currentStep: state.currentStep + 2 };
       }
       return {
@@ -82,20 +106,18 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   previousStep: () =>
     set((state) => {
-      if (state.currentStep === 2 && !state.formData.mainInfo.paperReady) {
+      if (state.currentStep === 2 && !state.paperReady) {
         return {
           currentStep: Math.max(0, state.currentStep - 2),
         };
       }
-      if (state.currentStep === 5 && !state.formData.terrainInfo.commercial) {
+      if (state.currentStep === 5 && !state.commercial) {
         return {
           currentStep: Math.max(0, state.currentStep - 2),
         };
       }
-      if (state.currentStep === 6 && !state.formData.mainInfo.partnership) {
-        return {
-          currentStep: Math.max(0, state.currentStep - 2),
-        };
+      if (state.currentStep === 4 && !state.partnership) {
+        return { currentStep: state.currentStep + 2 };
       }
       return {
         currentStep: Math.max(0, state.currentStep - 1),
@@ -108,7 +130,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       currentStep: 0,
     }),
 
-  createProject: async (projectData) => {
+  createProject: async (projectData: CreateProjectPayload) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetchData<Project>("/projects", {
@@ -120,16 +142,12 @@ export const useProjectStore = create<ProjectState>((set) => ({
         projects: [...state.projects, response.data],
         isLoading: false,
       }));
-      toast.success("Project created successfully");
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "Failed to create project",
         isLoading: false,
       });
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create project"
-      );
       throw error;
     }
   },
@@ -151,9 +169,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
           error instanceof Error ? error.message : "Failed to fetch project",
         isLoading: false,
       });
-      toast.error(
-        error instanceof Error ? error.message : "Failed to fetch project"
-      );
+
       throw error;
     }
   },
@@ -180,11 +196,30 @@ export const useProjectStore = create<ProjectState>((set) => ({
             : "Failed to fetch company projects",
         isLoading: false,
       });
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch company projects"
-      );
+      throw error;
+    }
+  },
+
+  getProjectKpis: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetchData<ProjectKpis>(`/projects/${id}/kpis`, {
+        method: "GET",
+        requiresAuth: true,
+      });
+      set({
+        projectKpis: response.data,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch project kpis",
+        isLoading: false,
+      });
+
       throw error;
     }
   },
@@ -208,12 +243,15 @@ export const useProjectStore = create<ProjectState>((set) => ({
             : "Failed to fetch partnership projects",
         isLoading: false,
       });
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch partnership projects"
-      );
       throw error;
     }
   },
+
+  addUnit: (unit: ProjectUnit) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        units: [...state.formData.units, unit],
+      },
+    })),
 }));

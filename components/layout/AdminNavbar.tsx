@@ -19,7 +19,7 @@ const navItems = [
 ];
 
 export default function AdminNavbar() {
-  const { logout } = useAuthStore();
+  const { logout, isLoading } = useAuthStore();
 
   const handleLogout = async () => {
     try {
@@ -47,8 +47,17 @@ export default function AdminNavbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={handleLogout}>
-          <MdLogout />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleLogout}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <MdLogout />
+          )}
         </Button>
         <Button variant="ghost" size="sm">
           <Link

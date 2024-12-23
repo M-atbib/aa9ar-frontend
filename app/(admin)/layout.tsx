@@ -21,7 +21,9 @@ export default function AdminLayout({
       <ErrorAlert />
       <div className="">
         <AdminNavbar />
-        <div className="w-[90%] mx-auto text-darkText">{children}</div>
+        <div className="w-[90%] min-h-[calc(100vh-150px)] mx-auto text-darkText space-y-4">
+          {children}
+        </div>
         <Footer />
       </div>
     </div>

@@ -4,18 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { useProjectStore } from "@/stores/projectStore";
+import { CreateProjectPayload } from "@/types/project-type";
 
 export default function MainInfo() {
-  const { formData, updateFormData } = useProjectStore();
+  const { formData, paperReady, partnership, setCheckbox, updateFormData } =
+    useProjectStore();
 
   const handleInputChange = (
-    field: string,
-    value: string | number | boolean
+    field: keyof CreateProjectPayload,
+    value: CreateProjectPayload[keyof CreateProjectPayload]
   ) => {
-    updateFormData("mainInfo", {
-      ...formData.mainInfo,
-      [field]: value,
-    });
+    updateFormData(field, value);
   };
 
   return (
@@ -31,8 +30,8 @@ export default function MainInfo() {
           <Input
             type="text"
             placeholder="ex: Résidence Les Oliviers"
-            value={formData.mainInfo.title || ""}
-            onChange={(e) => handleInputChange("title", e.target.value)}
+            value={formData.name || ""}
+            onChange={(e) => handleInputChange("name", e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -40,7 +39,7 @@ export default function MainInfo() {
           <Input
             type="text"
             placeholder="ex: 123 Avenue Mohammed V"
-            value={formData.mainInfo.address || ""}
+            value={formData.address || ""}
             onChange={(e) => handleInputChange("address", e.target.value)}
           />
         </div>
@@ -49,7 +48,7 @@ export default function MainInfo() {
           <Input
             type="text"
             placeholder="ex: Casablanca"
-            value={formData.mainInfo.city || ""}
+            value={formData.city || ""}
             onChange={(e) => handleInputChange("city", e.target.value)}
           />
         </div>
@@ -58,18 +57,34 @@ export default function MainInfo() {
           <Input
             type="number"
             placeholder="ex: 5000000"
-            value={formData.mainInfo.budget || ""}
+            value={formData.total_budget || ""}
             onChange={(e) =>
-              handleInputChange("budget", Number(e.target.value))
+              handleInputChange("total_budget", Number(e.target.value))
             }
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm">Date de début</Label>
+          <Input
+            type="date"
+            placeholder="ex: 5000000"
+            value={formData.start_date || ""}
+            onChange={(e) => handleInputChange("start_date", e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm">Date de fin</Label>
+          <Input
+            type="date"
+            placeholder="ex: 5000000"
+            value={formData.end_date || ""}
+            onChange={(e) => handleInputChange("end_date", e.target.value)}
           />
         </div>
         <div className="flex items-center gap-2">
           <Checkbox
-            checked={formData.mainInfo.paperReady || false}
-            onCheckedChange={(checked) =>
-              handleInputChange("paperReady", !!checked)
-            }
+            checked={paperReady || false}
+            onCheckedChange={(checked) => setCheckbox("paperReady", !!checked)}
           />
           <Label className="text-sm">
             La documentation du projet est complète
@@ -77,10 +92,8 @@ export default function MainInfo() {
         </div>
         <div className="flex items-center gap-2">
           <Checkbox
-            checked={formData.mainInfo.partnership || false}
-            onCheckedChange={(checked) =>
-              handleInputChange("partnership", !!checked)
-            }
+            checked={partnership || false}
+            onCheckedChange={(checked) => setCheckbox("partnership", !!checked)}
           />
           <Label className="text-sm">
             Ce projet est en partenariat avec une autre entreprise
