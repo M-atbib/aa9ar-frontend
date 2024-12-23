@@ -83,3 +83,8 @@ export interface ProjectKpis {
   project_status: "PLANNING" | "IN_PROGRESS" | "COMPLETED";
   breakdown: ProjectKpisBreakdown;
 }
+
+export interface Partner {
+  email: string;
+  percentage: number;
+}

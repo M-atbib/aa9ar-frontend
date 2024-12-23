@@ -15,7 +15,7 @@ export default function ProjectView() {
     if (id) {
       getProjectKpis(id as string);
     }
-  }, []);
+  }, [getProjectKpis, id]);
 
   return (
     <div className="min-h-[calc(100vh-10rem)]">

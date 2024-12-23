@@ -2,13 +2,11 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { useProjectStore } from "@/stores/projectStore";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function LegalPaper() {
-  const { formData } = useProjectStore();
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [currentName, setCurrentName] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
