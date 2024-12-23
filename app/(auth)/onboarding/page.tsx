@@ -4,8 +4,16 @@ import StepOne from "@/components/onboarding/StepOne";
 import StepTwo from "@/components/onboarding/StepTwo";
 import Image from "next/image";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import StepThree from "@/components/onboarding/StepThree";
+// import { useEffect } from "react";
+
 export default function Onboarding() {
-  const { step } = useOnboardingStore();
+  const { step, setStep } = useOnboardingStore();
+
+  // useEffect(() => {
+  //   // TODO: add api of invitation
+  //   setStep(3);
+  // }, []);
 
   const renderStep = () => {
     switch (step) {
@@ -13,6 +21,8 @@ export default function Onboarding() {
         return <StepOne />;
       case 2:
         return <StepTwo />;
+      case 3:
+        return <StepThree />;
     }
   };
 
@@ -25,6 +35,7 @@ export default function Onboarding() {
         height={200}
         className="w-32 mx-auto mb-16"
       />
+      {/*  */}
       {renderStep()}
     </div>
   );
