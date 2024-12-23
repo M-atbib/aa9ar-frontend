@@ -16,7 +16,7 @@ interface OnboardingStore {
 }
 
 export const useOnboardingStore = create<OnboardingStore>((set) => ({
-  step: 1,
+  step: 3,
   isLoading: false,
   error: null,
 

@@ -5,3 +5,4 @@ export interface InvitedPartner {
   percentage: number;
   status: string;
 }
+

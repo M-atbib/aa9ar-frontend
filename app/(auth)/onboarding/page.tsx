@@ -8,7 +8,8 @@ import StepThree from "@/components/onboarding/StepThree";
 // import { useEffect } from "react";
 
 export default function Onboarding() {
-  const { step, setStep } = useOnboardingStore();
+  // TODO: add setStep here
+  const { step } = useOnboardingStore();
 
   // useEffect(() => {
   //   // TODO: add api of invitation
@@ -16,6 +17,7 @@ export default function Onboarding() {
   // }, []);
 
   const renderStep = () => {
+    console.log(step);
     switch (step) {
       case 1:
         return <StepOne />;
