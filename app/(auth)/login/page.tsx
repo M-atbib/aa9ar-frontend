@@ -6,14 +6,18 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
 import { IoMdArrowBack } from "react-icons/io";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/stores/authStore";
-import { useRouter } from "next/navigation";
+import { useRouter ,useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Login() {
+  toast.error('test');
+
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -91,13 +95,24 @@ export default function Login() {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     setErrors((prev) => ({
       ...prev,
       [name]: "",
     }));
   };
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "auth_failed") {
+      setErrors((prev) => ({
+        ...prev,
+        email: "L\'adresse email est deja existé ",
+      }));
+    }
+  }, [searchParams]);
 
+  const handleGoogleLogin = () => {
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent('http://localhost:3000/googlecallback')}&response_type=code&scope=email profile&access_type=offline`;
+  };
   return (
     <div className="flex justify-between">
       <div className="w-[50%] pl-16 mt-14">
@@ -172,7 +187,12 @@ export default function Login() {
             </Link>
           </div>
 
-          <Button variant="outline" className="w-full">
+          <Button
+            variant="outline"
+            className="w-full"
+            type="button"
+            onClick={handleGoogleLogin}
+          >
             <FcGoogle />
             Se connecter avec Google
           </Button>

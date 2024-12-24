@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import Cookies from "js-cookie";
 
 // Define paths that require authentication
 const protectedPaths = [
@@ -36,6 +37,8 @@ export function middleware(request: NextRequest) {
   ) {
     // Clear any remaining cookies just in case
     const response = NextResponse.redirect(new URL("/login", request.url));
+    console.log('token',Cookies.get("token"));
+    
     response.cookies.delete("token");
     response.cookies.delete("refreshToken");
     return response;

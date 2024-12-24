@@ -22,7 +22,7 @@ export default function Profile() {
     };
     loadData();
   }, [fetchUser, getCompanies, getProjectPartners]);
-
+  
   return (
     <div className="space-y-6">
       <Breadcrumb items={[{ link: "", title: "Profile" }]} />

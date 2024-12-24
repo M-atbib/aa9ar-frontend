@@ -6,14 +6,16 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
 import { IoMdArrowBack } from "react-icons/io";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState,useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/stores/authStore";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Signup() {
   const router = useRouter();
   const { register, isLoading } = useAuthStore();
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -153,6 +155,20 @@ export default function Signup() {
     }));
   };
 
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error === "auth_failed") {
+      setErrors((prev) => ({
+        ...prev,
+        email: "L'authentification Google a échoué",
+      }));
+    }
+  }, [searchParams]);
+
+  const handleGoogleLogin = () => {
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent('http://localhost:3000/googlecallback')}&response_type=code&scope=email profile&access_type=offline`;
+  };
+
   return (
     <div className="flex justify-between">
       <div className="w-[50%] pl-16 mt-14">
@@ -211,7 +227,7 @@ export default function Signup() {
             <span className="w-full h-[1px] bg-gray-300"></span>
           </div>
 
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full"  onClick={handleGoogleLogin}>
             <FcGoogle />
             S&apos;inscrire avec Google
           </Button>

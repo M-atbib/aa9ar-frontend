@@ -4,6 +4,7 @@ import { fetchData } from "@/utils/fetchData";
 interface InviteState {
   isLoading: boolean;
   error: string | null;
+  invitations?: any[]; // Add this property to hold the invitations
   sendInvitation: (email: string, percentage: number) => Promise<void>;
   respondToInvitation: (
     token: string,
@@ -27,6 +28,7 @@ interface InviteState {
 export const useInviteStore = create<InviteState>((set) => ({
   isLoading: false,
   error: null,
+  invitations: [], // Initialize invitations in the state
 
   getInvitation: async (id: string) => {
     try {
@@ -48,15 +50,19 @@ export const useInviteStore = create<InviteState>((set) => ({
   getCompanyInvitations: async (companyId: string) => {
     try {
       set({ isLoading: true, error: null });
-      await fetchData(`/invitations/company/${companyId}`, {
+      const response = await fetchData(`/companies/${companyId}/invitations`, {
         method: "GET",
         requiresAuth: true,
       });
-      set({ isLoading: false });
+      set({ 
+        isLoading: false,
+        invitations: response.data as any[]
+      });
     } catch (error) {
       set({
         isLoading: false,
         error: error instanceof Error ? error.message : "An error occurred",
+        invitations: []
       });
       throw error;
     }
@@ -173,3 +179,4 @@ export const useInviteStore = create<InviteState>((set) => ({
     }
   },
 }));
+

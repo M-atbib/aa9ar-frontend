@@ -65,67 +65,68 @@ export default function ProjectList({ isLoading }: { isLoading: boolean }) {
         ))
       ) : (
         <>
-          {projects.map((project) => (
-            <Card key={project.id} className="bg-primaryDark text-white">
-              <CardHeader className="flex flex-row items-center justify-between relative">
-                <div>
-                  <CardTitle>{project.name}</CardTitle>
-                  <CardDescription>{project.address}</CardDescription>
-                </div>
+          {Array.isArray(projects) && projects.length > 0 ? (
+            projects.map((project) => (
+              <Card key={project.id} className="bg-primaryDark text-white">
+                <CardHeader className="flex flex-row items-center justify-between relative">
+                  <div>
+                    <CardTitle>{project.name}</CardTitle>
+                    <CardDescription>{project.address}</CardDescription>
+                  </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="hover:bg-primary/20 rounded-full absolute top-6 right-6">
-                    <BsThreeDotsVertical className="h-5 w-5" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-white">
-                    <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                      <Link
-                        href={`/project/${project.id}/details`}
-                        className="flex items-center gap-2"
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="hover:bg-primary/20 rounded-full absolute top-6 right-6">
+                      <BsThreeDotsVertical className="h-5 w-5" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-white">
+                      <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                        <Link
+                          href={`/project/${project.id}/details`}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span>Details du projet</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="flex items-center gap-2 cursor-pointer text-red-600"
+                        onClick={() => handleDelete(project.id)}
                       >
-                        <Eye className="h-4 w-4" />
-                        <span>Details du projet</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="flex items-center gap-2 cursor-pointer text-red-600"
-                      onClick={() => handleDelete(project.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span>Supprimer</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardHeader>
+                        <Trash2 className="h-4 w-4" />
+                        <span>Supprimer</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardHeader>
 
-              <CardContent>
-                <ul>
-                  <li>
-                    <span className="font-bold">Status:</span> {project.status}
-                  </li>
-                  <li>
-                    <span className="font-bold">Budget:</span>{" "}
-                    {project.total_budget} Dh
-                  </li>
-                  <li>
-                    <span className="font-bold">Start Date:</span>{" "}
-                    {new Date(project.start_date).toLocaleDateString()}
-                  </li>
-                  <li>
-                    <span className="font-bold">End Date:</span>{" "}
-                    {new Date(project.end_date).toLocaleDateString()}
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter className="flex items-end justify-end">
-                <Link href={`/project/${project.id}`}>
-                  <Button className="w-full" variant="secondary">
-                    Inspecter les Dossiers
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
+                <CardContent>
+                  <ul>
+                    <li>
+                      <span className="font-bold">Status:</span> {project.status}
+                    </li>
+                    <li>
+                      <span className="font-bold">Budget:</span> {project.total_budget} Dh
+                    </li>
+                    <li>
+                      <span className="font-bold">Start Date:</span>{" "}
+                      {new Date(project.start_date).toLocaleDateString()}
+                    </li>
+                    <li>
+                      <span className="font-bold">End Date:</span>{" "}
+                      {new Date(project.end_date).toLocaleDateString()}
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="flex items-end justify-end">
+                  <Link href={`/project/${project.id}`}>
+                    <Button className="w-full" variant="secondary">
+                      Inspecter les Dossiers
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))
+          ) : (null)}
         </>
       )}
       <Card

@@ -21,7 +21,7 @@ import {
 } from "../ui/dialog";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useInviteStore } from "@/stores/invitesStore";
 import { toast } from "sonner";
 import { InvitedPartner } from "@/types/invites-type";
@@ -31,13 +31,23 @@ const AddPartnerDialog = () => {
     email: "",
     percentage: "",
   });
-  const { sendInvitation, isLoading } = useInviteStore();
+  const [isOpen, setIsOpen] = useState(false);
+  const { sendInvitation, isLoading, getCompanyInvitations } = useInviteStore();
+  const { company } = useCompanyStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await sendInvitation(formData.email, Number(formData.percentage));
       toast.success("Invitation envoyée avec succès");
+
+      setFormData({ email: "", percentage: "" });
+
+      if (company?.id) {
+        await getCompanyInvitations(company?.id);
+      }
+
+      setIsOpen(false);
     } catch {
       toast.error("Échec de l'envoi de l'invitation");
     }
@@ -52,7 +62,7 @@ const AddPartnerDialog = () => {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="float-right mb-4">
           Ajouter un partenaire
@@ -74,6 +84,7 @@ const AddPartnerDialog = () => {
               placeholder="exemple@email.com"
               value={formData.email}
               onChange={handleChange}
+              required
             />
           </div>
           <div className="space-y-1">
@@ -84,6 +95,9 @@ const AddPartnerDialog = () => {
               placeholder="50"
               value={formData.percentage}
               onChange={handleChange}
+              required
+              min="0"
+              max="100"
             />
           </div>
           <Button
@@ -100,8 +114,37 @@ const AddPartnerDialog = () => {
 };
 
 export default function PartnerInfo() {
-  const { projectPartners } = useCompanyStore();
+  const { company } = useCompanyStore();
+  const { getCompanyInvitations, invitations, isLoading, deleteInvitation } = useInviteStore();
 
+  const fetchInvitations = async () => {
+    if (company?.id) {
+      try {
+        await getCompanyInvitations(company.id);
+      } catch (error) {
+        toast.error("Échec du chargement des invitations");
+      }
+    }
+  };
+
+  const handleDeleteInvitation = async (invitationId: string) => {
+    try {
+      await deleteInvitation(invitationId);
+      toast.success("Invitation supprimée avec succès");
+    } catch (error) {
+      toast.error("Échec de la suppression de l'invitation");
+    }finally{
+      fetchInvitations();
+    }
+  };
+
+
+  useEffect(() => {
+    
+    fetchInvitations();
+  }, [company, getCompanyInvitations]);
+
+ 
   return (
     <div>
       <AddPartnerDialog />
@@ -111,22 +154,43 @@ export default function PartnerInfo() {
           <TableRow>
             <TableHead>Adresse Email</TableHead>
             <TableHead>Statut</TableHead>
+            <TableHead>Date d'expiration</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {projectPartners.map((partner: InvitedPartner) => (
-            <TableRow key={partner._id}>
-              <TableCell>{partner.email}</TableCell>
-              <TableCell>{partner.status}</TableCell>
-              <TableCell>
-                <Button variant="ghost" size="icon">
-                  <MdDeleteSweep />
-                </Button>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={4} style={{ textAlign: "center" }}>
+                Chargement...
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            invitations?.map(({ _id, email, status, expires_at }) => (
+              <TableRow key={_id}>
+                <TableCell>{email}</TableCell>
+                <TableCell>{status}</TableCell>
+                <TableCell
+                  style={{
+                    color: new Date(expires_at) < new Date() ? "red" : "green",
+                  }}
+                >
+                  {new Date(expires_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteInvitation(_id)}
+                  >
+                    <MdDeleteSweep />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
+
       </Table>
     </div>
   );
