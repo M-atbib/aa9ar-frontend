@@ -35,7 +35,11 @@ export async function fetchData<T>(
     requiresAuth = false,
   } = options;
   const url = `${process.env.NEXT_PUBLIC_API_URL}/api${endpoint}`;
+  console.log('token',Cookies.get("token"));
+
   const accessToken = Cookies.get("token");
+  console.log('accessToken' , accessToken);
+  
   const { setError } = useAppStore.getState();
 
   // Initialize fetch options

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { fetchData } from "@/utils/fetchData";
 import { toast } from "sonner";
 import { Company, CompanyKPI } from "@/types/company-type";
+import Cookies from "js-cookie";
 
 interface CompanyState {
   company: Company;
@@ -24,6 +25,8 @@ export const useCompanyStore = create<CompanyState>((set) => ({
   companyKpis: [],
 
   getCompanies: async () => {
+  console.log('token getCompanies',Cookies.get("token"));
+
     set({ isLoading: true, error: null });
     try {
       const response = await fetchData<Company>("/companies", {
