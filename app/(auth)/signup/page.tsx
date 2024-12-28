@@ -6,12 +6,12 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
 import { IoMdArrowBack } from "react-icons/io";
-import { FormEvent, useState,useEffect } from "react";
+import { FormEvent, useState, useEffect, Suspense } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Signup() {
+function SignupContent() {
   const router = useRouter();
   const { register, isLoading } = useAuthStore();
   const searchParams = useSearchParams();
@@ -22,6 +22,7 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+
   const [errors, setErrors] = useState({
     username: "",
     email: "",
@@ -121,24 +122,6 @@ export default function Signup() {
       router.push("/onboarding");
     } catch (error) {
       console.log("Registration failed:", error);
-      // Handle API errors here if needed
-      // if (error instanceof Error) {
-      //   try {
-      //     const errorData = JSON.parse(error.message);
-      //     if (errorData.errors) {
-      //       const apiErrors = {
-      //         username: errorData.errors.full_name?.[0] || "",
-      //         email: errorData.errors.email?.[0] || "",
-      //         password: errorData.errors.password?.[0] || "",
-      //         confirmPassword: errorData.errors.password_confirmation?.[0] || "",
-      //       };
-      //       setErrors(apiErrors);
-      //     }
-      //   } catch {
-      //     // If error message isn't JSON parseable, show generic error
-      //     setErrors(prev => ({...prev, email: "Une erreur est survenue"}));
-      //   }
-      // }
     }
   };
 
@@ -166,7 +149,11 @@ export default function Signup() {
   }, [searchParams]);
 
   const handleGoogleLogin = () => {
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent('http://localhost:3000/googlecallback')}&response_type=code&scope=email profile&access_type=offline`;
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    }&redirect_uri=${encodeURIComponent(
+      "http://localhost:3000/googlecallback"
+    )}&response_type=code&scope=email profile&access_type=offline`;
   };
 
   return (
@@ -227,7 +214,11 @@ export default function Signup() {
             <span className="w-full h-[1px] bg-gray-300"></span>
           </div>
 
-          <Button variant="outline" className="w-full"  onClick={handleGoogleLogin}>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogleLogin}
+          >
             <FcGoogle />
             S&apos;inscrire avec Google
           </Button>
@@ -250,5 +241,13 @@ export default function Signup() {
         />
       </div>
     </div>
+  );
+}
+
+export default function Signup() {
+  return (
+    <Suspense>
+      <SignupContent />
+    </Suspense>
   );
 }

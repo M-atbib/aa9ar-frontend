@@ -20,9 +20,9 @@ interface AuthState {
   expiresAt: number | null;
   refreshToken: string;
   register: (data: RegisterData) => Promise<void>;
-  login: (data: LoginData) => Promise<void>;
+  login: (data: LoginData) => Promise<LoginResponse>;
   logout: () => Promise<void>;
-  fetchUser: () => Promise<void>;
+  fetchUser: () => Promise<User>;
   refreshTokenHandler: () => Promise<string>;
   setIsTokenExpired: (value: boolean) => void;
   setToken: (accessToken: string, refreshToken: string) => void;
@@ -80,6 +80,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+      return response.data as User;
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to fetch user",
@@ -194,6 +195,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       });
       toast.success("Connexion réussie");
+
+      return response.data as LoginResponse;
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Login failed",

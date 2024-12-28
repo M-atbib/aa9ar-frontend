@@ -3,7 +3,7 @@ export interface User {
   id: string;
   full_name: string;
   email: string;
-  status: string;
+  status: "ACTIVE" | "ONBOARDING";
   last_login: string;
   auth_type: string;
   roles: {
@@ -40,7 +40,7 @@ export interface Role {
 // Extended user details including id, status and roles
 export interface UserDetails extends User {
   id: string;
-  status: string;
+  status: "ACTIVE" | "ONBOARDING";
   roles: Role[];
 }
 

@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { fetchData } from "@/utils/fetchData";
+import { CompanyInvite } from "@/types/invites-type";
 
 interface InviteState {
   isLoading: boolean;
   error: string | null;
-  invitations?: any[]; // Add this property to hold the invitations
+  invitations?: CompanyInvite[];
   sendInvitation: (email: string, percentage: number) => Promise<void>;
   respondToInvitation: (
     token: string,
@@ -30,6 +31,7 @@ export const useInviteStore = create<InviteState>((set) => ({
   error: null,
   invitations: [], // Initialize invitations in the state
 
+  // doesnt exist in the backend
   getInvitation: async (id: string) => {
     try {
       set({ isLoading: true, error: null });
@@ -54,15 +56,15 @@ export const useInviteStore = create<InviteState>((set) => ({
         method: "GET",
         requiresAuth: true,
       });
-      set({ 
+      set({
         isLoading: false,
-        invitations: response.data as any[]
+        invitations: response.data as CompanyInvite[],
       });
     } catch (error) {
       set({
         isLoading: false,
         error: error instanceof Error ? error.message : "An error occurred",
-        invitations: []
+        invitations: [],
       });
       throw error;
     }
@@ -179,4 +181,3 @@ export const useInviteStore = create<InviteState>((set) => ({
     }
   },
 }));
-
