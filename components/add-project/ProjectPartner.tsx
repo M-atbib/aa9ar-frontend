@@ -3,19 +3,30 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-dropdown-menu";
-// import { useProjectStore } from "@/stores/projectStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Partner } from "@/types/project-type";
+import { useProjectStore } from "@/stores/projectStore";
 
 export default function ProjectPartner() {
-  // const { updateFormData } = useProjectStore();
-  const [numberOfPartners, setNumberOfPartners] = useState<number>(0);
+  const { formData, updateFormData } = useProjectStore();
+
+
+  const [numberOfPartners, setNumberOfPartners] = useState<number>(
+    formData.number_of_partners || 0
+  );
   const [currentPartner, setCurrentPartner] = useState<Partner>({
     email: "",
     percentage: 0,
   });
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [partners, setPartners] = useState<Partner[]>(
+    formData.partners || []
+  );
+
+  useEffect(() => {
+    updateFormData("number_of_partners", numberOfPartners);
+    updateFormData("partners", partners);
+  }, [numberOfPartners, partners]);
 
   const handleSavePartner = () => {
     if (!currentPartner.email || !currentPartner.percentage) {
@@ -33,20 +44,16 @@ export default function ProjectPartner() {
       return;
     }
 
+
     const updatedPartners = [...partners, currentPartner];
     setPartners(updatedPartners);
 
-    // Update form data with all partners
-    // updateFormData("partner", {
-    //   number_of_partners: numberOfPartners,
-    //   partners: updatedPartners,
-    // });
 
-    // Reset current partner
     setCurrentPartner({
       email: "",
       percentage: 0,
     });
+
     toast.success("Partenaire ajouté avec succès");
   };
 

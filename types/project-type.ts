@@ -43,6 +43,15 @@ export interface CreateProjectPayload {
   global_apartments_info: GlobalApartmentsInfo;
   global_commercial_info: GlobalCommercialInfo;
   units: ProjectUnit[];
+  legalPapers: LegalPaper[]; 
+  partners: Partner[];     
+  number_of_partners:number,  
+}
+
+
+export interface LegalPaper {
+  name: string;
+  file: File; 
 }
 
 // Project response interfaces
