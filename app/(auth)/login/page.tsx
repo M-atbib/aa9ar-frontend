@@ -6,15 +6,14 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
 import { IoMdArrowBack } from "react-icons/io";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, Suspense } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/stores/authStore";
-import { useRouter ,useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-export default function Login() {
-  toast.error('test');
-
+function LoginContent() {
+  toast.error("test");
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
   const searchParams = useSearchParams();
@@ -70,25 +69,6 @@ export default function Login() {
     return isValid;
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      await login({
-        email: formData.email,
-        password: formData.password,
-      });
-      router.push("/dashboard");
-    } catch (error) {
-      console.log(error);
-      setErrors((prev) => ({
-        ...prev,
-        email: "Email ou mot de passe incorrect",
-      }));
-    }
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -100,18 +80,46 @@ export default function Login() {
       [name]: "",
     }));
   };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      const loginData = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (loginData.user.status === "ACTIVE") {
+        router.push("/dashboard");
+      } else {
+        router.push("/onboarding");
+      }
+    } catch (error) {
+      console.log(error);
+      setErrors((prev) => ({
+        ...prev,
+        email: "Email ou mot de passe incorrect",
+      }));
+    }
+  };
+
   useEffect(() => {
     const error = searchParams.get("error");
     if (error === "auth_failed") {
       setErrors((prev) => ({
         ...prev,
-        email: "L\'adresse email est deja existé ",
+        email: "L'adresse email est deja existé ",
       }));
     }
   }, [searchParams]);
 
   const handleGoogleLogin = () => {
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent('http://localhost:3000/googlecallback')}&response_type=code&scope=email profile&access_type=offline`;
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    }&redirect_uri=${encodeURIComponent(
+      "http://localhost:3000/googlecallback"
+    )}&response_type=code&scope=email profile&access_type=offline`;
   };
   return (
     <div className="flex justify-between">
@@ -208,5 +216,13 @@ export default function Login() {
         />
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -6,3 +6,11 @@ export interface InvitedPartner {
   status: string;
 }
 
+export interface CompanyInvite {
+  _id: string;
+  email: string;
+  status: string;
+  expires_at: string;
+  company_name: string;
+  manager_name: string;
+}

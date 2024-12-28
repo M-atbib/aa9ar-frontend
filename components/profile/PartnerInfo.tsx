@@ -24,7 +24,6 @@ import { Input } from "../ui/input";
 import { useState, useEffect } from "react";
 import { useInviteStore } from "@/stores/invitesStore";
 import { toast } from "sonner";
-import { InvitedPartner } from "@/types/invites-type";
 
 const AddPartnerDialog = () => {
   const [formData, setFormData] = useState({
@@ -115,7 +114,8 @@ const AddPartnerDialog = () => {
 
 export default function PartnerInfo() {
   const { company } = useCompanyStore();
-  const { getCompanyInvitations, invitations, isLoading, deleteInvitation } = useInviteStore();
+  const { getCompanyInvitations, invitations, isLoading, deleteInvitation } =
+    useInviteStore();
 
   const fetchInvitations = async () => {
     if (company?.id) {
@@ -123,6 +123,7 @@ export default function PartnerInfo() {
         await getCompanyInvitations(company.id);
       } catch (error) {
         toast.error("Échec du chargement des invitations");
+        console.log(error);
       }
     }
   };
@@ -133,18 +134,16 @@ export default function PartnerInfo() {
       toast.success("Invitation supprimée avec succès");
     } catch (error) {
       toast.error("Échec de la suppression de l'invitation");
-    }finally{
+      console.log(error);
+    } finally {
       fetchInvitations();
     }
   };
 
-
   useEffect(() => {
-    
     fetchInvitations();
   }, [company, getCompanyInvitations]);
 
- 
   return (
     <div>
       <AddPartnerDialog />
@@ -154,7 +153,7 @@ export default function PartnerInfo() {
           <TableRow>
             <TableHead>Adresse Email</TableHead>
             <TableHead>Statut</TableHead>
-            <TableHead>Date d'expiration</TableHead>
+            <TableHead>Date d&apos;expiration</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -190,7 +189,6 @@ export default function PartnerInfo() {
             ))
           )}
         </TableBody>
-
       </Table>
     </div>
   );
