@@ -26,7 +26,7 @@ interface ProjectState {
   nextStep: () => void;
   previousStep: () => void;
   resetForm: () => void;
-  createProject: (projectData: CreateProjectPayload) => Promise<void>;
+  createProject: (projectData: CreateProjectPayload) => Promise<string>;
   getProject: (id: string) => Promise<void>;
   getCompanyProjects: (companyId: string) => Promise<void>;
   getProjectKpis: (id: string) => Promise<void>;
@@ -60,10 +60,16 @@ const initialFormData: CreateProjectPayload = {
     profit_margin: 0,
   },
   units: [],
+  legalPapers:[],
+  partners:[],
+  number_of_partners:0
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],
+  partners: [], 
+  legalPapers: [], 
+  number_of_partners:0,
   currentProject: null,
   partnershipProjects: [],
   isLoading: false,
@@ -138,10 +144,15 @@ export const useProjectStore = create<ProjectState>((set) => ({
         body: projectData,
         requiresAuth: true,
       });
-      set((state) => ({
-        projects: [...state.projects, response.data],
-        isLoading: false,
-      }));
+      
+      const newProject = response.data;
+
+    set((state) => ({
+      projects: [...state.projects, newProject],
+      isLoading: false,
+    }));
+
+    return newProject.id; 
     } catch (error) {
       set({
         error:

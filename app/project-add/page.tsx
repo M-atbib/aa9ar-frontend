@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import { useCompanyStore } from "@/stores/companyStore";
 import { useEffect } from "react";
+import { useInviteStore } from "@/stores/invitesStore";
+import { useDocumentStore } from "@/stores/documentStore";
+import { useRouter } from "next/navigation";
 
 export default function ProjectAdd() {
   const {
@@ -28,6 +31,9 @@ export default function ProjectAdd() {
   } = useProjectStore();
 
   const { getCompanies } = useCompanyStore();
+  const { inviteProjectPartner ,respondToProjectInvite} = useInviteStore();
+  const { uploadProjectDocuments } = useDocumentStore();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,10 +78,52 @@ export default function ProjectAdd() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLastStep() && formData.company_id !== "") {
-      console.log(isLastStep());
-      await createProject(formData);
+      try {
+        const projectId = await createProject(formData);
+        console.log("Created Project ID:", projectId);
+
+        if (formData.partners && formData.partners.length > 0) {
+          console.log("Inviting partners...");
+          const promises = formData.partners.map((partner) =>
+            inviteProjectPartner(projectId, partner.email, partner.percentage).then(() => {
+              console.log(`Invitation sent to ${partner.email}, auto-accepting...`);
+              return respondToProjectInvite(partner.email, "accept");
+            })
+            .then(() => {
+              console.log(`Invitation auto-accepted for ${partner.email}`);
+            })
+            .catch((error) => {
+              console.error(`Error handling invite for ${partner.email}:`, error);
+            })
+          );
+          await Promise.all(promises);
+          console.log("All partners invited successfully!");
+        }
+
+        // Upload legal documents
+        // if (formData.legalPapers && formData.legalPapers.length > 0) {
+        //   console.log("Uploading legal documents...");
+        //   console.log(formData.legalPapers);
+        //   const uploadPromises = formData.legalPapers.map((legalPaper) =>
+        //     uploadProjectDocuments(projectId, legalPaper, 'LEGAL').catch((err) => {
+        //       console.error(`Error uploading document ${legalPaper.name}:`, err);
+        //     })
+        //   );
+        //   await Promise.all(uploadPromises);
+        //   console.log("All documents uploaded successfully!");
+        // }
+
+        alert("Project created successfully with all documents and partners!");
+        router.push("/dashboard");
+
+
+      } catch (error) {
+        console.error("Error during project creation process:", error);
+        alert("An error occurred while creating the project.");
+      }
     }
   };
+
 
   return (
     <div className="container-md max-w-screen-md flex flex-col items-center gap-8 mx-auto my-10">
