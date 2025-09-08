@@ -29,3 +29,10 @@ export interface CompanyKPI {
   };
   total_projects: number;
 }
+
+export interface Category {
+  name: string;
+  updated_at: string;
+  created_at: string;
+  id: string;
+}

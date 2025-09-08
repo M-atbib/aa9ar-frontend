@@ -2,7 +2,6 @@
 
 import { useProjectStore } from "@/stores/projectStore";
 import MainInfo from "@/components/add-project/MainInfo";
-import LegalPaper from "@/components/add-project/LegalPaper";
 import TerrainInfo from "@/components/add-project/TerrainInfo";
 import AppartementInfo from "@/components/add-project/AppartementInfo";
 import CommercialInfo from "@/components/add-project/CommercialInfo";
@@ -13,13 +12,11 @@ import Breadcrumb from "@/components/layout/Breadcrumb";
 import { useCompanyStore } from "@/stores/companyStore";
 import { useEffect } from "react";
 import { useInviteStore } from "@/stores/invitesStore";
-import { useDocumentStore } from "@/stores/documentStore";
 import { useRouter } from "next/navigation";
 
 export default function ProjectAdd() {
   const {
     currentStep,
-    paperReady,
     commercial,
     partnership,
     formData,
@@ -31,8 +28,7 @@ export default function ProjectAdd() {
   } = useProjectStore();
 
   const { getCompanies } = useCompanyStore();
-  const { inviteProjectPartner ,respondToProjectInvite} = useInviteStore();
-  const { uploadProjectDocuments } = useDocumentStore();
+  const { inviteProjectPartner, respondToProjectInvite } = useInviteStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -50,14 +46,12 @@ export default function ProjectAdd() {
       case 0:
         return <MainInfo />;
       case 1:
-        return paperReady && <LegalPaper />;
-      case 2:
         return <TerrainInfo />;
-      case 3:
+      case 2:
         return <AppartementInfo />;
-      case 4:
+      case 3:
         return commercial && <CommercialInfo />;
-      case 5:
+      case 4:
         return partnership && <ProjectPartner />;
       default:
         return null;
@@ -67,7 +61,7 @@ export default function ProjectAdd() {
   const isLastStep = () => {
     if (!commercial && !partnership && currentStep === 3) return true;
     if (commercial && !partnership && currentStep === 4) return true;
-    if (partnership && currentStep === 5) return true;
+    if (partnership && currentStep === 4) return true;
     return false;
   };
 
@@ -85,16 +79,22 @@ export default function ProjectAdd() {
         if (formData.partners && formData.partners.length > 0) {
           console.log("Inviting partners...");
           const promises = formData.partners.map((partner) =>
-            inviteProjectPartner(projectId, partner.email, partner.percentage).then(() => {
-              console.log(`Invitation sent to ${partner.email}, auto-accepting...`);
-              return respondToProjectInvite(partner.email, "accept");
-            })
-            .then(() => {
-              console.log(`Invitation auto-accepted for ${partner.email}`);
-            })
-            .catch((error) => {
-              console.error(`Error handling invite for ${partner.email}:`, error);
-            })
+            inviteProjectPartner(projectId, partner.email, partner.percentage)
+              .then(() => {
+                console.log(
+                  `Invitation sent to ${partner.email}, auto-accepting...`
+                );
+                return respondToProjectInvite(partner.email, "accept");
+              })
+              .then(() => {
+                console.log(`Invitation auto-accepted for ${partner.email}`);
+              })
+              .catch((error) => {
+                console.error(
+                  `Error handling invite for ${partner.email}:`,
+                  error
+                );
+              })
           );
           await Promise.all(promises);
           console.log("All partners invited successfully!");
@@ -115,15 +115,12 @@ export default function ProjectAdd() {
 
         alert("Project created successfully with all documents and partners!");
         router.push("/dashboard");
-
-
       } catch (error) {
         console.error("Error during project creation process:", error);
         alert("An error occurred while creating the project.");
       }
     }
   };
-
 
   return (
     <div className="container-md max-w-screen-md flex flex-col items-center gap-8 mx-auto my-10">

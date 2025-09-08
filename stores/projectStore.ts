@@ -15,7 +15,6 @@ interface ProjectState {
   error: string | null;
   formData: CreateProjectPayload;
   currentStep: number;
-  paperReady: boolean;
   commercial: boolean;
   partnership: boolean;
   projectKpis: ProjectKpis;
@@ -60,23 +59,22 @@ const initialFormData: CreateProjectPayload = {
     profit_margin: 0,
   },
   units: [],
-  legalPapers:[],
-  partners:[],
-  number_of_partners:0
+  legalPapers: [],
+  partners: [],
+  number_of_partners: 0,
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],
-  partners: [], 
-  legalPapers: [], 
-  number_of_partners:0,
+  partners: [],
+  legalPapers: [],
+  number_of_partners: 0,
   currentProject: null,
   partnershipProjects: [],
   isLoading: false,
   error: null,
   formData: initialFormData,
   currentStep: 0,
-  paperReady: false,
   commercial: false,
   partnership: false,
   projectKpis: {} as ProjectKpis,
@@ -96,13 +94,10 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   nextStep: () =>
     set((state) => {
-      if (state.currentStep === 0 && !state.paperReady) {
+      if (state.currentStep === 2 && !state.commercial) {
         return { currentStep: state.currentStep + 2 };
       }
-      if (state.currentStep === 3 && !state.commercial) {
-        return { currentStep: state.currentStep + 2 };
-      }
-      if (state.currentStep === 4 && !state.partnership) {
+      if (state.currentStep === 3 && !state.partnership) {
         return { currentStep: state.currentStep + 2 };
       }
       return {
@@ -112,17 +107,12 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   previousStep: () =>
     set((state) => {
-      if (state.currentStep === 2 && !state.paperReady) {
+      if (state.currentStep === 4 && !state.commercial) {
         return {
           currentStep: Math.max(0, state.currentStep - 2),
         };
       }
-      if (state.currentStep === 5 && !state.commercial) {
-        return {
-          currentStep: Math.max(0, state.currentStep - 2),
-        };
-      }
-      if (state.currentStep === 4 && !state.partnership) {
+      if (state.currentStep === 3 && !state.partnership) {
         return { currentStep: state.currentStep + 2 };
       }
       return {
@@ -144,15 +134,15 @@ export const useProjectStore = create<ProjectState>((set) => ({
         body: projectData,
         requiresAuth: true,
       });
-      
+
       const newProject = response.data;
 
-    set((state) => ({
-      projects: [...state.projects, newProject],
-      isLoading: false,
-    }));
+      set((state) => ({
+        projects: [...state.projects, newProject],
+        isLoading: false,
+      }));
 
-    return newProject.id; 
+      return newProject.id;
     } catch (error) {
       set({
         error:
@@ -166,7 +156,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   getProject: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetchData<Project>(`/projects/info/${id}`, {
+      const response = await fetchData<Project>(`/projects/${id}`, {
         method: "GET",
         requiresAuth: true,
       });

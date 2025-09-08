@@ -7,7 +7,7 @@ import { useProjectStore } from "@/stores/projectStore";
 import { CreateProjectPayload } from "@/types/project-type";
 
 export default function MainInfo() {
-  const { formData, paperReady, partnership, setCheckbox, updateFormData } =
+  const { formData, partnership, setCheckbox, updateFormData } =
     useProjectStore();
 
   const handleInputChange = (
@@ -80,15 +80,6 @@ export default function MainInfo() {
             value={formData.end_date || ""}
             onChange={(e) => handleInputChange("end_date", e.target.value)}
           />
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={paperReady || false}
-            onCheckedChange={(checked) => setCheckbox("paperReady", !!checked)}
-          />
-          <Label className="text-sm">
-            La documentation du projet est complète
-          </Label>
         </div>
         <div className="flex items-center gap-2">
           <Checkbox

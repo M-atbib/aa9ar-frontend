@@ -10,55 +10,51 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { PlusIcon } from "lucide-react";
+import { Loader2, PlusIcon } from "lucide-react";
 import { Label } from "@radix-ui/react-dropdown-menu";
+import { useWorkforceStore } from "@/stores/workforceStore";
+import { Workforce } from "@/types/folders-type";
+import { useParams } from "next/navigation";
 
-interface AddMaterialEffectifProps {
-  type: "material" | "effectif";
-  onSubmit: (data: {
-    date: string;
-    label: string;
-    quantity: number;
-    measureUnit: string;
-    pricePerUnit: number;
-    note?: string;
-  }) => void;
+interface AddWorkforceProps {
+  categoryId?: string;
 }
 
-export default function AddMaterialEffectif({
-  type,
-  onSubmit,
-}: AddMaterialEffectifProps) {
+export default function AddWorkforce({ categoryId }: AddWorkforceProps) {
+  const { id } = useParams();
+  const { createWorkforce } = useWorkforceStore();
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    date: "",
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<Workforce>({
+    project_id: id as string,
+    category_id: categoryId || "",
+    entry_date: "",
     label: "",
-    quantity: 0,
-    measureUnit: "",
-    pricePerUnit: 0,
+    total_cost: 0,
     note: "",
-  });
+  } as Workforce);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    setLoading(true);
+    await createWorkforce(formData as Workforce);
     setOpen(false);
     setFormData({
-      date: "",
+      project_id: id as string,
+      category_id: categoryId || "",
+      entry_date: "",
       label: "",
-      quantity: 0,
-      measureUnit: "",
-      pricePerUnit: 0,
+      total_cost: 0,
       note: "",
-    });
+    } as Workforce);
+    setLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "quantity" || name === "pricePerUnit" ? Number(value) : value,
+      [name]: name === "total_cost" ? Number(value) : value,
     }));
   };
 
@@ -67,18 +63,15 @@ export default function AddMaterialEffectif({
       <DialogTrigger asChild>
         <Button>
           <PlusIcon className="h-4 w-4 mr-2" />
-          Ajouter {type === "material" ? "Matériel" : "Effectif"}
+          Ajouter main d&apos;oeuvre
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Ajouter {type === "material" ? "un matériel" : "un effectif"}
-          </DialogTitle>
+          <DialogTitle>Ajouter main d&apos;oeuvre</DialogTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Remplissez les informations ci-dessous pour ajouter{" "}
-            {type === "material" ? "un nouveau matériel" : "un nouvel effectif"}{" "}
-            au projet.
+            Remplissez les informations ci-dessous pour ajouter une nouvelle
+            main d&apos;oeuvre au projet.
           </p>
         </DialogHeader>
 
@@ -87,10 +80,10 @@ export default function AddMaterialEffectif({
             <div className="space-y-2">
               <Label>Date</Label>
               <Input
-                id="date"
-                name="date"
+                id="entry_date"
+                name="entry_date"
                 type="date"
-                value={formData.date}
+                value={formData.entry_date}
                 onChange={handleChange}
                 required
               />
@@ -108,35 +101,12 @@ export default function AddMaterialEffectif({
             </div>
 
             <div className="space-y-2">
-              <Label>Quantité</Label>
+              <Label>Coût total</Label>
               <Input
-                id="quantity"
-                name="quantity"
+                id="total_cost"
+                name="total_cost"
                 type="number"
-                value={formData.quantity}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Unité de mesure</Label>
-              <Input
-                id="measureUnit"
-                name="measureUnit"
-                value={formData.measureUnit}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Prix unitaire</Label>
-              <Input
-                id="pricePerUnit"
-                name="pricePerUnit"
-                type="number"
-                value={formData.pricePerUnit}
+                value={formData.total_cost}
                 onChange={handleChange}
                 required
               />
@@ -154,7 +124,14 @@ export default function AddMaterialEffectif({
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit">Ajouter</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <PlusIcon className="h-4 w-4 mr-2" />
+              )}
+              Ajouter
+            </Button>
           </div>
         </form>
       </DialogContent>

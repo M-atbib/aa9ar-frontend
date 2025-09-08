@@ -3,12 +3,18 @@
 import { useParams } from "next/navigation";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MaterialEffectifTable from "@/components/project/MaterialEffectifTable";
+import MaterialEffectifTable from "@/components/project/MaterialTable";
 import RecapTable from "@/components/project/RecapTable";
-import AddMaterialEffectif from "@/components/project/AddMaterialEffectif";
+import AddMaterial from "@/components/project/AddMaterial";
+import { useMaterialStore } from "@/stores/materialStore";
+import { useEffect } from "react";
+import { useCompanyStore } from "@/stores/companyStore";
 
 export default function Material() {
   const { id } = useParams();
+  const { getCategories, categories } = useCompanyStore();
+  const { getMaterialsByCategory, getMaterialRecap, recap, materials } =
+    useMaterialStore();
   const tabs = [
     {
       value: "Resumer",
@@ -57,6 +63,24 @@ export default function Material() {
     },
   ];
 
+  useEffect(() => {
+    if (id) {
+      getCategories();
+      getMaterialRecap(id as string);
+    }
+  }, [getCategories, getMaterialRecap, id]);
+
+  const handleTabChange = (value: string) => {
+    if (value !== "Resumer" && id && categories) {
+      const category = categories.find(
+        (cat) => cat.name.replace(/\s+/g, "_") === value
+      );
+      if (category) {
+        getMaterialsByCategory(category.id, id as string);
+      }
+    }
+  };
+
   return (
     <div>
       <Breadcrumb
@@ -68,7 +92,7 @@ export default function Material() {
 
       <h1 className="text-3xl font-bold my-8">Materiaux</h1>
 
-      <Tabs defaultValue="Resumer">
+      <Tabs defaultValue="Resumer" onValueChange={handleTabChange}>
         <TabsList className="">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
@@ -80,11 +104,17 @@ export default function Material() {
         {tabs.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
             {tab.type === "recap" ? (
-              <RecapTable data={[]} />
+              <RecapTable data={recap} />
             ) : (
               <div className="flex gap-4 items-start justify-between">
-                <MaterialEffectifTable data={[]} />
-                <AddMaterialEffectif type="material" onSubmit={() => {}} />
+                <MaterialEffectifTable data={materials || []} />
+                <AddMaterial
+                  categoryId={
+                    categories?.find(
+                      (cat) => cat.name.replace(/\s+/g, "_") === tab.value
+                    )?.id
+                  }
+                />
               </div>
             )}
           </TabsContent>

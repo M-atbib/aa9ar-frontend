@@ -8,22 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Recap } from "@/types/folders-type";
 
 interface RecapTableProps {
-  data: {
-    date: string;
-    label: string;
-    quantity: number;
-    measureUnit: string;
-    pricePerUnit: number;
-    note?: string;
-  }[];
-  onUpdate?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  data: Recap[] | null;
 }
 
 export default function RecapTable({ data }: RecapTableProps) {
-  // Group data by label and calculate totals
+  // Group data by designation
   const categories = [
     "Gros oeuvre",
     "Electricite",
@@ -36,16 +28,13 @@ export default function RecapTable({ data }: RecapTableProps) {
   ];
 
   const totals = categories.map((category) => {
-    const items = data.filter((item) => item.label === category);
-    const total = items.reduce(
-      (sum, item) => sum + item.quantity * item.pricePerUnit,
-      0
-    );
+    const item = Array.isArray(data)
+      ? data.find((item) => item.designation === category)
+      : null;
     return {
       category,
-      total,
-      partner1Share: total * 0.5, // Assuming 50-50 split
-      partner2Share: total * 0.5,
+      total: item?.total_price || 0,
+      partners: item?.partners || [],
     };
   });
 
@@ -56,8 +45,9 @@ export default function RecapTable({ data }: RecapTableProps) {
           <TableRow>
             <TableHead>Category</TableHead>
             <TableHead>Total Cost</TableHead>
-            <TableHead>Partner1 share</TableHead>
-            <TableHead>Partner2 share</TableHead>
+            {totals[0]?.partners.map((partner, index) => (
+              <TableHead key={index}>{partner.name} share</TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,8 +55,11 @@ export default function RecapTable({ data }: RecapTableProps) {
             <TableRow key={index}>
               <TableCell>{row.category}</TableCell>
               <TableCell>{row.total.toFixed(2)} DH</TableCell>
-              <TableCell>{row.partner1Share.toFixed(2)} DH</TableCell>
-              <TableCell>{row.partner2Share.toFixed(2)} DH</TableCell>
+              {row.partners.map((partner, index) => (
+                <TableCell key={index}>
+                  {partner.amount.toFixed(2)} DH
+                </TableCell>
+              ))}
             </TableRow>
           ))}
           <TableRow className="font-bold">
@@ -74,18 +67,18 @@ export default function RecapTable({ data }: RecapTableProps) {
             <TableCell>
               {totals.reduce((sum, row) => sum + row.total, 0).toFixed(2)} DH
             </TableCell>
-            <TableCell>
-              {totals
-                .reduce((sum, row) => sum + row.partner1Share, 0)
-                .toFixed(2)}{" "}
-              DH
-            </TableCell>
-            <TableCell>
-              {totals
-                .reduce((sum, row) => sum + row.partner2Share, 0)
-                .toFixed(2)}{" "}
-              DH
-            </TableCell>
+            {totals[0]?.partners.map((_, partnerIndex) => (
+              <TableCell key={partnerIndex}>
+                {totals
+                  .reduce(
+                    (sum, row) =>
+                      sum + (row.partners[partnerIndex]?.amount || 0),
+                    0
+                  )
+                  .toFixed(2)}{" "}
+                DH
+              </TableCell>
+            ))}
           </TableRow>
         </TableBody>
       </Table>

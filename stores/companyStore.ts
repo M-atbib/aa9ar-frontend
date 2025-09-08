@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { fetchData } from "@/utils/fetchData";
 import { toast } from "sonner";
-import { Company, CompanyKPI } from "@/types/company-type";
+import { Company, CompanyKPI, Category } from "@/types/company-type";
 import Cookies from "js-cookie";
 
 interface CompanyState {
@@ -10,11 +10,13 @@ interface CompanyState {
   error: string | null;
   projectPartners: [];
   companyKpis: CompanyKPI[];
+  categories: Category[];
   getCompanies: () => Promise<Company>;
   updateCompany: (id: string, data: Partial<Company>) => Promise<void>;
   deleteCompany: (id: string) => Promise<void>;
   getProjectPartners: () => Promise<void>;
   getCompayKpis: () => Promise<void>;
+  getCategories: () => Promise<Category[]>;
 }
 
 export const useCompanyStore = create<CompanyState>((set) => ({
@@ -23,9 +25,10 @@ export const useCompanyStore = create<CompanyState>((set) => ({
   isLoading: false,
   error: null,
   companyKpis: [],
+  categories: [],
 
   getCompanies: async () => {
-  console.log('token getCompanies',Cookies.get("token"));
+    console.log("token getCompanies", Cookies.get("token"));
 
     set({ isLoading: true, error: null });
     try {
@@ -134,6 +137,27 @@ export const useCompanyStore = create<CompanyState>((set) => ({
         requiresAuth: true,
       });
       set({ companyKpis: response.data, isLoading: false });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : "Failed to fetch kpis",
+        isLoading: false,
+      });
+      toast.error(
+        error instanceof Error ? error.message : "Failed to fetch kpis"
+      );
+      throw error;
+    }
+  },
+
+  getCategories: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetchData<Category[]>("/categories", {
+        method: "GET",
+        requiresAuth: true,
+      });
+      set({ categories: response.data, isLoading: false });
+      return response.data;
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to fetch kpis",
